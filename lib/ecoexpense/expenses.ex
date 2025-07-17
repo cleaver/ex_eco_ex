@@ -7,6 +7,7 @@ defmodule Ecoexpense.Expenses do
   alias Ecoexpense.Repo
 
   alias Ecoexpense.Expenses.Expense
+  alias Ecoexpense.Expenses.ExpenseItem
 
   @doc """
   Returns the list of expenses.
@@ -18,11 +19,12 @@ defmodule Ecoexpense.Expenses do
 
   """
   def list_expenses do
-    Repo.all(Expense)
+    from(e in Expense, order_by: [desc: :inserted_at], preload: :expense_items)
+    |> Repo.all()
   end
 
   @doc """
-  Gets a single expense.
+  Gets a single expense, preloaded with expense items.
 
   Raises `Ecto.NoResultsError` if the Expense does not exist.
 
@@ -35,7 +37,11 @@ defmodule Ecoexpense.Expenses do
       ** (Ecto.NoResultsError)
 
   """
-  def get_expense!(id), do: Repo.get!(Expense, id)
+  def get_expense!(id) do
+    Expense
+    |> Repo.get!(id)
+    |> Repo.preload(:expense_items)
+  end
 
   @doc """
   Creates a expense.
@@ -100,5 +106,25 @@ defmodule Ecoexpense.Expenses do
   """
   def change_expense(%Expense{} = expense, attrs \\ %{}) do
     Expense.changeset(expense, attrs)
+  end
+
+  def list_expense_items(expense_id) do
+    from(e in ExpenseItem,
+      where: e.expense_id == ^expense_id,
+      order_by: [desc: :inserted_at],
+      preload: :expense
+    )
+    |> Repo.all()
+  end
+
+  def create_expense_item(attrs) do
+    %ExpenseItem{}
+    |> ExpenseItem.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_expense_item!(expense, id) do
+    ExpenseItem
+    |> Repo.get_by!(expense_id: expense.id, id: id)
   end
 end

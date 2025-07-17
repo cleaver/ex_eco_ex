@@ -8,7 +8,7 @@ defmodule EcoexpenseWeb.ExpenseLive.Show do
     ~H"""
     <Layouts.app flash={@flash}>
       <.header>
-        Expense {@expense.id}
+        Expense {@expense.desc}
         <:subtitle>This is a expense record from your database.</:subtitle>
         <:actions>
           <.button navigate={~p"/expenses"}>
@@ -22,6 +22,12 @@ defmodule EcoexpenseWeb.ExpenseLive.Show do
 
       <.list>
         <:item title="Desc">{@expense.desc}</:item>
+        <:item title="Items">
+          <.table id="expense-items" rows={@expense.expense_items}>
+            <:col :let={item}>{item.detail}</:col>
+            <:col :let={item}>{item.amount}</:col>
+          </.table>
+        </:item>
       </.list>
     </Layouts.app>
     """
