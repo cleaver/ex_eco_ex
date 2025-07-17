@@ -11,6 +11,10 @@ config :ecoexpense,
   ecto_repos: [Ecoexpense.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :ecoexpense, Ecoexpense.Repo,
+  migration_primary_key: [name: :id, type: :binary_id],
+  migration_foreign_key: [type: :binary_id]
+
 # Configures the endpoint
 config :ecoexpense, EcoexpenseWeb.Endpoint,
   url: [host: "localhost"],

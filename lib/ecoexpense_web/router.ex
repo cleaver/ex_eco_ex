@@ -18,6 +18,11 @@ defmodule EcoexpenseWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/expenses", ExpenseLive.Index, :index
+    live "/expenses/new", ExpenseLive.Form, :new
+    live "/expenses/:id", ExpenseLive.Show, :show
+    live "/expenses/:id/edit", ExpenseLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.
