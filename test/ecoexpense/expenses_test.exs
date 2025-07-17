@@ -109,5 +109,30 @@ defmodule Ecoexpense.ExpensesTest do
         Expenses.get_expense_item!(expense2, expense_item.id)
       end
     end
+
+    test "update_expense_item/2 with valid data updates the expense item" do
+      expense = expense_fixture()
+      expense_item = expense_item_fixture(%{expense_id: expense.id})
+      update_attrs = %{detail: "some updated detail", amount: "25.75"}
+
+      assert {:ok, %ExpenseItem{} = updated_expense_item} =
+               Expenses.update_expense_item(expense_item, update_attrs)
+
+      assert updated_expense_item.detail == "some updated detail"
+      assert updated_expense_item.amount == "25.75"
+    end
+
+    test "update_expense_item/2 with invalid data returns error changeset" do
+      expense = expense_fixture()
+      expense_item = expense_item_fixture(%{expense_id: expense.id})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Expenses.update_expense_item(expense_item, @invalid_expense_item_attrs)
+
+      # Verify the expense item wasn't changed
+      unchanged_expense_item = Expenses.get_expense_item!(expense, expense_item.id)
+      assert unchanged_expense_item.detail == expense_item.detail
+      assert unchanged_expense_item.amount == expense_item.amount
+    end
   end
 end

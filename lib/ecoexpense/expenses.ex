@@ -127,4 +127,10 @@ defmodule Ecoexpense.Expenses do
     ExpenseItem
     |> Repo.get_by!(expense_id: expense.id, id: id)
   end
+
+  def update_expense_item(%ExpenseItem{} = expense_item, attrs) do
+    expense_item
+    |> ExpenseItem.changeset(attrs)
+    |> Repo.update()
+  end
 end
