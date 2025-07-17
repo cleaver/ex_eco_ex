@@ -15,6 +15,15 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
 
       <.form for={@form} id="expense-form" phx-change="validate" phx-submit="save">
         <.input field={@form[:desc]} type="text" label="Desc" />
+        <div :if={@live_action == :edit}>
+          <h3>Details</h3>
+          <.inputs_for :let={f_nested} field={@form[:expense_items]}>
+            <div class="flex gap-2">
+              <.input field={f_nested[:detail]} type="text" label="Detail" />
+              <.input field={f_nested[:amount]} type="text" label="Amount" />
+            </div>
+          </.inputs_for>
+        </div>
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Expense</.button>
           <.button navigate={return_path(@return_to, @expense)}>Cancel</.button>
@@ -55,6 +64,7 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
 
   @impl true
   def handle_event("validate", %{"expense" => expense_params}, socket) do
+    IO.inspect(expense_params, label: "expense_params")
     changeset = Expenses.change_expense(socket.assigns.expense, expense_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end

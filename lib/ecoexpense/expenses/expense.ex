@@ -15,6 +15,7 @@ defmodule Ecoexpense.Expenses.Expense do
   def changeset(expense, attrs) do
     expense
     |> cast(attrs, [:desc])
+    |> cast_assoc(:expense_items)
     |> validate_required([:desc])
   end
 end
