@@ -21,6 +21,7 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
             <div class="flex gap-2">
               <.input field={f_nested[:detail]} type="text" label="Detail" />
               <.input field={f_nested[:amount]} type="text" label="Amount" />
+              <.input field={f_nested[:delete]} type="checkbox" label="Delete" />
             </div>
           </.inputs_for>
         </div>
