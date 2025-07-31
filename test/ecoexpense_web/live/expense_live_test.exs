@@ -32,7 +32,7 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
                |> render_click()
                |> follow_redirect(conn, ~p"/expenses/new")
 
-      assert render(form_live) =~ "New Expense"
+      assert has_element?(form_live, "h1", "New Expense")
 
       assert form_live
              |> form("#expense-form", expense: @invalid_attrs)
@@ -44,9 +44,10 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
                |> render_submit()
                |> follow_redirect(conn, ~p"/expenses")
 
-      html = render(index_live)
-      assert html =~ "Expense created successfully"
-      assert html =~ "some desc"
+      # tried using assert_redirect(ed) to test the flash message, to no avail
+      assert has_element?(index_live, "#flash-info>>>p", "Expense created successfully")
+
+      assert has_element?(index_live, "tbody#expenses>tr>td", "some desc")
     end
 
     test "updates expense in listing", %{conn: conn, expense: expense} do
@@ -58,7 +59,7 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
                |> render_click()
                |> follow_redirect(conn, ~p"/expenses/#{expense}/edit")
 
-      assert render(form_live) =~ "Edit Expense"
+      assert has_element?(form_live, "h1", "Edit Expense")
 
       assert form_live
              |> form("#expense-form", expense: @invalid_attrs)
@@ -70,9 +71,10 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
                |> render_submit()
                |> follow_redirect(conn, ~p"/expenses")
 
-      html = render(index_live)
-      assert html =~ "Expense updated successfully"
-      assert html =~ "some updated desc"
+      # tried using assert_redirect(ed) to test the flash message, to no avail
+      assert has_element?(index_live, "#flash-info>>>p", "Expense updated successfully")
+
+      assert has_element?(index_live, "tbody#expenses>tr>td", "some updated desc")
     end
 
     test "deletes expense in listing", %{conn: conn, expense: expense} do
@@ -87,10 +89,10 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
     setup [:create_expense]
 
     test "displays expense", %{conn: conn, expense: expense} do
-      {:ok, _show_live, html} = live(conn, ~p"/expenses/#{expense}")
+      {:ok, show_live, _html} = live(conn, ~p"/expenses/#{expense}")
 
-      assert html =~ "Show Expense"
-      assert html =~ expense.desc
+      assert has_element?(show_live, "h1", "Expense #{expense.desc}")
+      assert has_element?(show_live, "li.list-row>div>div", expense.desc)
     end
 
     test "updates expense and returns to show", %{conn: conn, expense: expense} do
@@ -114,9 +116,10 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
                |> render_submit()
                |> follow_redirect(conn, ~p"/expenses/#{expense}")
 
-      html = render(show_live)
-      assert html =~ "Expense updated successfully"
-      assert html =~ "some updated desc"
+      # tried using assert_redirect(ed) to test the flash message, to no avail
+      assert has_element?(show_live, "#flash-info>>>p", "Expense updated successfully")
+
+      assert has_element?(show_live, "li.list-row>div>div", "some updated desc")
     end
   end
 end

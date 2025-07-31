@@ -79,7 +79,6 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
   end
 
   def handle_event("validate", %{"expense" => expense_params}, socket) do
-    # IO.inspect(expense_params, label: "expense_params")
     changeset = Expenses.change_expense(socket.assigns.expense, expense_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
