@@ -133,4 +133,8 @@ defmodule Ecoexpense.Expenses do
     |> ExpenseItem.changeset(attrs)
     |> Repo.update()
   end
+
+  def change_expense_item(%ExpenseItem{} = expense_item, attrs \\ %{}) do
+    ExpenseItem.changeset(expense_item, attrs)
+  end
 end
