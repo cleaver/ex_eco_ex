@@ -3,6 +3,7 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
 
   alias Ecoexpense.Expenses
   alias Ecoexpense.Expenses.Expense
+  alias Ecoexpense.Expenses.ExpenseItem
 
   @impl true
   def render(assigns) do
@@ -25,6 +26,7 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
             </div>
           </.inputs_for>
         </div>
+        <a href="#" phx-click="add-item">Add item</a>
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Expense</.button>
           <.button navigate={return_path(@return_to, @expense)}>Cancel</.button>
@@ -64,6 +66,18 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
   end
 
   @impl true
+  def handle_event("add-item", _params, socket) do
+    changeset = socket.assigns.form.source
+    new_expense_item = Expenses.change_expense_item(%ExpenseItem{})
+
+    expense_items =
+      Ecto.Changeset.get_assoc(changeset, :expense_items) ++
+        [new_expense_item]
+
+    new_changeset = Ecto.Changeset.put_assoc(changeset, :expense_items, expense_items)
+    {:noreply, assign(socket, form: to_form(new_changeset))}
+  end
+
   def handle_event("validate", %{"expense" => expense_params}, socket) do
     changeset = Expenses.change_expense(socket.assigns.expense, expense_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
