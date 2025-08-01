@@ -122,4 +122,86 @@ defmodule EcoexpenseWeb.ExpenseLiveTest do
       assert has_element?(show_live, "li.list-row>div>div", "some updated desc")
     end
   end
+
+  describe "Edit" do
+    setup [:create_expense]
+
+    test "adds new expense item to existing expense", %{conn: conn, expense: expense} do
+      {:ok, show_live, _html} = live(conn, ~p"/expenses/#{expense}")
+
+      assert {:ok, form_live, _} =
+               show_live
+               |> element("a", "Edit")
+               |> render_click()
+               |> follow_redirect(conn, ~p"/expenses/#{expense}/edit?return_to=show")
+
+      assert render(form_live) =~ "Edit Expense"
+      assert render(form_live) =~ "Details"
+
+      assert form_live
+             |> element("a", "Add item")
+             |> render_click()
+
+      assert render(form_live) =~ "Detail"
+      assert render(form_live) =~ "Amount"
+      assert render(form_live) =~ "Remove"
+
+      expense_with_items = %{
+        "desc" => expense.desc,
+        "expense_items" => %{
+          "0" => %{
+            "detail" => "New test item",
+            "amount" => "25.75"
+          }
+        }
+      }
+
+      assert {:ok, show_live, _html} =
+               form_live
+               |> form("#expense-form", expense: expense_with_items)
+               |> render_submit()
+               |> follow_redirect(conn, ~p"/expenses/#{expense}")
+
+      assert has_element?(show_live, "#flash-info>>>p", "Expense updated successfully")
+
+      assert has_element?(show_live, "li.list-row>div>div", "New test item")
+    end
+
+    test "removes expense item from existing expense", %{conn: conn, expense: expense} do
+      expense_item = expense_item_fixture(%{expense_id: expense.id})
+
+      {:ok, show_live, _html} = live(conn, ~p"/expenses/#{expense}")
+
+      assert {:ok, form_live, _} =
+               show_live
+               |> element("a", "Edit")
+               |> render_click()
+               |> follow_redirect(conn, ~p"/expenses/#{expense}/edit?return_to=show")
+
+      assert render(form_live) =~ "Edit Expense"
+      assert render(form_live) =~ expense_item.detail
+
+      expense_with_deleted_item = %{
+        "desc" => expense.desc,
+        "expense_items" => %{
+          "0" => %{
+            "id" => expense_item.id,
+            "detail" => expense_item.detail,
+            "amount" => expense_item.amount,
+            "delete" => "true"
+          }
+        }
+      }
+
+      assert {:ok, show_live, _html} =
+               form_live
+               |> form("#expense-form", expense: expense_with_deleted_item)
+               |> render_submit()
+               |> follow_redirect(conn, ~p"/expenses/#{expense}")
+
+      assert has_element?(show_live, "#flash-info>>>p", "Expense updated successfully")
+
+      refute has_element?(show_live, "li.list-row>div>div", expense_item.detail)
+    end
+  end
 end
