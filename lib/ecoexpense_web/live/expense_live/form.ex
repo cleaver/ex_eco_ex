@@ -22,7 +22,21 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
             <div class="flex gap-2">
               <.input field={f_nested[:detail]} type="text" label="Detail" />
               <.input field={f_nested[:amount]} type="text" label="Amount" />
-              <.input field={f_nested[:delete]} type="checkbox" label="Delete" />
+              <div class="mt-4">
+                <%= if f_nested.data.id do %>
+                  <.input field={f_nested[:delete]} type="checkbox" label="Delete" />
+                <% else %>
+                  <.input field={f_nested[:temp_id]} type="hidden" />
+                  <button
+                    type="button"
+                    phx-click="remove-item"
+                    phx-value-id={f_nested.data.temp_id}
+                    class="text-red-500"
+                  >
+                    &times; Remove
+                  </button>
+                <% end %>
+              </div>
             </div>
           </.inputs_for>
         </div>
@@ -68,13 +82,27 @@ defmodule EcoexpenseWeb.ExpenseLive.Form do
   @impl true
   def handle_event("add-item", _params, socket) do
     changeset = socket.assigns.form.source
-    new_expense_item = Expenses.change_expense_item(%ExpenseItem{})
+    temp_id = Ecto.UUID.generate()
+    new_expense_item = Expenses.change_expense_item(%ExpenseItem{temp_id: temp_id})
 
     expense_items =
       Ecto.Changeset.get_assoc(changeset, :expense_items) ++
         [new_expense_item]
 
     new_changeset = Ecto.Changeset.put_assoc(changeset, :expense_items, expense_items)
+    {:noreply, assign(socket, form: to_form(new_changeset))}
+  end
+
+  def handle_event("remove-item", %{"id" => temp_id}, socket) do
+    expense_items =
+      Ecto.Changeset.get_assoc(socket.assigns.form.source, :expense_items)
+      |> Enum.reject(fn changeset ->
+        changeset.data.temp_id == temp_id
+      end)
+
+    new_changeset =
+      Ecto.Changeset.put_assoc(socket.assigns.form.source, :expense_items, expense_items)
+
     {:noreply, assign(socket, form: to_form(new_changeset))}
   end
 
